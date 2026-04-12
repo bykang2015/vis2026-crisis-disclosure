@@ -1,15 +1,19 @@
-Convergent Timing, Divergent Trajectories
-Visualizing the Temporal Paradox of Child Crisis Disclosure
-Anonymous Submission — IEEE VIS 2026 Short Papers
+# Convergent Timing, Divergent Trajectories
+## Visualizing the Temporal Paradox of Child Crisis Disclosure
 
-Across 3,236 Korean child counseling sessions, aggregate statistics suggest
-near-identical disclosure timing (MSW₅₀ = 9–11 turns). This conclusion is wrong.
-Visualizing full temporal trajectories reveals a 25-percentage-point detection gap
-between Emergency (97%) and Normal (72%) cases — invisible in any tabular summary.
+**Anonymous Submission — IEEE VIS 2026 Short Papers**
 
+> Across 3,236 Korean child counseling sessions, aggregate statistics suggest
+> near-identical disclosure timing (MSW₅₀ = 9–11 turns). This conclusion is wrong.
+> Visualizing full temporal trajectories reveals a 25-percentage-point detection gap
+> between Emergency (97%) and Normal (72%) cases — invisible in any tabular summary.
 
-Quick Start (5 minutes)
-bash# 1. Clone
+---
+
+## Quick Start (5 minutes)
+
+```bash
+# 1. Clone
 git clone https://anonymous.4open.science/r/vis2026-crisis-disclosure-85EC
 cd vis2026-crisis-disclosure
 
@@ -18,11 +22,17 @@ bash run_pipeline.sh
 
 # 3. View interactive figure
 open visualization/interactive_dashboard.html
-All results are reproduced from synthetic data that preserves the
+```
+
+All results are reproduced from **synthetic data** that preserves the
 statistical structure of the original corpus. The real AI Hub dataset is not
 redistributed (license terms); the pipeline is fully functional without it.
 
-Repository Structure
+---
+
+## Repository Structure
+
+```
 vis2026-crisis-disclosure/
 │
 ├── run_pipeline.sh              End-to-end reproducibility script
@@ -45,56 +55,114 @@ vis2026-crisis-disclosure/
 └── results/
     ├── full_detection_table.csv  Cumulative detection T5–T100
     └── glm_coefficients.csv      GLM hazard model coefficients
+```
 
-Step-by-Step Usage
-1. Install dependencies
-bashpip install -r requirements.txt
-2. Generate synthetic data
-bashpython generate_synthetic.py --n_sessions 500 --seed 42
+---
+
+## Step-by-Step Usage
+
+### 1. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Generate synthetic data
+
+```bash
+python generate_synthetic.py --n_sessions 500 --seed 42
 # Output: data/synthetic_sessions.csv, data/synthetic_turns.csv
+```
+
 Full corpus size (N=3,236):
-bashpython generate_synthetic.py
-3. Run keyword anchoring
-bashpython analysis/keyword_anchoring.py \
+```bash
+python generate_synthetic.py
+```
+
+### 3. Run keyword anchoring
+
+```bash
+python analysis/keyword_anchoring.py \
     --sessions data/synthetic_turns.csv \
     --taxonomy data/keyword_taxonomy.csv
 # Output: results/anchored_sessions.csv
+```
+
 With semantic robustness validation (requires sentence-transformers):
-bashpython analysis/keyword_anchoring.py \
+```bash
+python analysis/keyword_anchoring.py \
     --sessions data/synthetic_turns.csv \
     --taxonomy data/keyword_taxonomy.csv \
     --semantic
-4. Run survival analysis
-bashpython analysis/survival_analysis.py \
+```
+
+### 4. Run survival analysis
+
+```bash
+python analysis/survival_analysis.py \
     --sessions data/synthetic_sessions.csv
 # Output: results/full_detection_table.csv
 #         results/marginal_gains.csv
 #         results/figure_traj.pdf
-5. Reproduce teaser figure (Fig. 1)
-bashpython visualization/teaser_figure.py
+```
+
+### 5. Reproduce teaser figure (Fig. 1)
+
+```bash
+python visualization/teaser_figure.py
 # Output: results/figure_teaser.png, results/figure_teaser.pdf
-6. Interactive dashboard
-Open visualization/interactive_dashboard.html in any browser.
+```
+
+### 6. Interactive dashboard
+
+Open `visualization/interactive_dashboard.html` in any browser.
 No server required — fully standalone.
 
-Key Results
-Crisis LevelNMSW₅₀T10T30T50Emergency6729 t54%87%97%Abuse-Suspected6449 t56%83%95%Counseling62111 t47%78%91%Observation63411 t41%66%83%Normal66510 t40%58%72%
-The 25pp gap at Turn 50 is invisible in the MSW₅₀ column.
+---
+
+## Key Results
+
+| Crisis Level    | N     | MSW₅₀ | T10  | T30  | T50      |
+|-----------------|-------|--------|------|------|----------|
+| Emergency       | 672   | 9 t    | 54%  | 87%  | **97%**  |
+| Abuse-Suspected | 644   | 9 t    | 56%  | 83%  | 95%      |
+| Counseling      | 621   | 11 t   | 47%  | 78%  | 91%      |
+| Observation     | 634   | 11 t   | 41%  | 66%  | 83%      |
+| Normal          | 665   | 10 t   | 40%  | 58%  | **72%**  |
+
+**The 25pp gap at Turn 50 is invisible in the MSW₅₀ column.**
 Log-rank: χ²=45.1, p<.001.
 
-Crisis-Adaptive Turn-Budget Recommendations
-Crisis LevelRecommended budgetBasisEmergency20–30 turns97% coverage; rapid saturationAbuse-Suspected30–50 turns95% coverage by T50Counseling50–80 turns91% coverage; moderate decayObservation50–80 turns83% coverage; moderate decayNormal80–100 turnsSustained marginal gain
+---
 
-Data
-Original corpus: AI Hub Korean Child Counseling Corpus
-(aihub.or.kr), N=3,236 sessions, 360,816 turns,
+## Crisis-Adaptive Turn-Budget Recommendations
+
+| Crisis Level    | Recommended budget | Basis                        |
+|-----------------|--------------------|------------------------------|
+| Emergency       | 20–30 turns        | 97% coverage; rapid saturation |
+| Abuse-Suspected | 30–50 turns        | 95% coverage by T50           |
+| Counseling      | 50–80 turns        | 91% coverage; moderate decay  |
+| Observation     | 50–80 turns        | 83% coverage; moderate decay  |
+| Normal          | 80–100 turns       | Sustained marginal gain       |
+
+---
+
+## Data
+
+**Original corpus:** AI Hub Korean Child Counseling Corpus
+([aihub.or.kr](https://aihub.or.kr)), N=3,236 sessions, 360,816 turns,
 ages 7–13, 2021–2023. Fully de-identified; public release.
 Not redistributed here per license terms.
-Synthetic corpus: Generated by generate_synthetic.py using
+
+**Synthetic corpus:** Generated by `generate_synthetic.py` using
 Weibull-calibrated disclosure timing and empirical category rates.
 Preserves population-level statistical structure; contains no real records.
 
-Environment
+---
+
+## Environment
+
+```
 Python 3.10+
 lifelines==0.29.0
 statsmodels==0.14.2
@@ -103,11 +171,18 @@ numpy==1.26.4
 scipy==1.13.0
 matplotlib==3.8.4
 sentence-transformers==3.0.1   # optional, semantic anchoring only
+```
 
-Citation
+---
+
+## Citation
+
 Anonymous submission. Citation information will be added upon acceptance.
 
-License
+---
+
+## License
+
 Code: MIT License.
 Synthetic data: CC0 (public domain).
 Original AI Hub corpus: subject to AI Hub terms of use.
