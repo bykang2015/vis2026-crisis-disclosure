@@ -1,4 +1,4 @@
-복사Convergent Timing, Divergent Trajectories
+Convergent Timing, Divergent Trajectories
 Visualizing the Temporal Paradox of Child Crisis Disclosure
 Anonymous Submission — IEEE VIS 2026 Short Papers
 
