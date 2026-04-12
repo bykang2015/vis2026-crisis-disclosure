@@ -1,0 +1,13 @@
+# Core analysis
+lifelines==0.29.0
+statsmodels==0.14.2
+pandas==2.2.2
+numpy==1.26.4
+scipy==1.13.0
+
+# Visualization
+matplotlib==3.8.4
+
+# Semantic anchoring (optional, for robustness validation)
+sentence-transformers==3.0.1
+scikit-learn==1.5.0

@@ -1,0 +1,10 @@
+predictor,predictor_type,odds_ratio,ci_lower,ci_upper,se,p_value,significance
+Turns 11-20 vs 1-10,temporal,1.196,1.08,1.32,0.051,<.001,***
+Turns 21-30 vs 1-10,temporal,0.874,0.79,0.97,0.046,.012,*
+Turns 31-50 vs 1-10,temporal,0.631,0.56,0.71,0.038,<.001,***
+Turns 51-100 vs 1-10,temporal,0.412,0.36,0.47,0.028,<.001,***
+Turns 101+ vs 1-10,temporal,0.284,0.24,0.34,0.025,<.001,***
+Emergency vs Observation,crisis_level,1.382,1.24,1.54,0.076,<.001,***
+Abuse-Suspected vs Observation,crisis_level,1.271,1.14,1.42,0.071,<.001,***
+Counseling vs Observation,crisis_level,1.108,0.99,1.24,0.063,.072,ns
+Normal vs Observation,crisis_level,0.781,0.69,0.88,0.049,<.001,***

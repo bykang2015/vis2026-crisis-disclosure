@@ -1,0 +1,7 @@
+crisis_level,N,MSW50_turns,T5_pct,T10_pct,T20_pct,T30_pct,T50_pct,T80_pct,T100_pct,detected_pct
+Emergency,672,9,30,54,75,87,97,99,99,92.4
+Abuse-Suspected,644,9,32,56,70,83,95,98,99,94.4
+Counseling,621,11,27,47,66,78,91,96,98,94.5
+Observation,634,11,22,41,55,66,83,90,94,92.9
+Normal,665,10,21,40,50,58,72,86,94,82.4
+Total,3236,,26,48,63,74,88,94,97,91.3

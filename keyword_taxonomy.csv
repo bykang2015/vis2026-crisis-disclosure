@@ -1,0 +1,44 @@
+category,category_korean,keyword_english,keyword_korean,severity_weight
+Physical Abuse,신체학대,hit,때리다,3
+Physical Abuse,신체학대,beat,폭행,3
+Physical Abuse,신체학대,kick,발로 차다,3
+Physical Abuse,신체학대,bruise,멍,3
+Physical Abuse,신체학대,hurt by parent,부모에게 맞다,3
+Physical Abuse,신체학대,slap,뺨을 때리다,3
+Physical Abuse,신체학대,threw,던지다,3
+Emotional Abuse,정서학대,yell,소리지르다,2
+Emotional Abuse,정서학대,threaten,협박하다,2
+Emotional Abuse,정서학대,ignore,무시하다,2
+Emotional Abuse,정서학대,belittle,무시하다,2
+Emotional Abuse,정서학대,scare,겁주다,2
+Emotional Abuse,정서학대,curse,욕하다,2
+Sexual Abuse,성학대,touch,만지다,4
+Sexual Abuse,성학대,private parts,신체부위,4
+Sexual Abuse,성학대,secret,비밀,4
+Sexual Abuse,성학대,uncomfortable,불편하다,4
+Sexual Abuse,성학대,bad touch,나쁜 접촉,4
+Neglect,방임,hungry,배고프다,2
+Neglect,방임,alone,혼자,2
+Neglect,방임,no food,밥이 없다,2
+Neglect,방임,no one home,집에 아무도 없다,2
+Neglect,방임,not taken care of,돌봐주지 않는다,2
+Self-Harm,자해,hurt myself,자해하다,4
+Self-Harm,자해,cut,자르다,4
+Self-Harm,자해,want to disappear,사라지고 싶다,4
+Self-Harm,자해,die,죽다,5
+Self-Harm,자해,not want to live,살고 싶지 않다,5
+Severe Distress,심각한 고통,can't sleep,잠을 못 자다,2
+Severe Distress,심각한 고통,cry,울다,2
+Severe Distress,심각한 고통,scared,무섭다,2
+Severe Distress,심각한 고통,shake,떨다,2
+Severe Distress,심각한 고통,nightmare,악몽,2
+Social Issues,사회적 문제,bully,괴롭히다,2
+Social Issues,사회적 문제,fight,싸우다,2
+Social Issues,사회적 문제,no friends,친구가 없다,2
+Social Issues,사회적 문제,excluded,따돌림,2
+Social Issues,사회적 문제,hate school,학교가 싫다,2
+General Distress,일반적 고통,sad,슬프다,1
+General Distress,일반적 고통,worried,걱정되다,1
+General Distress,일반적 고통,upset,힘들다,1
+General Distress,일반적 고통,difficult,어렵다,1
+General Distress,일반적 고통,hard,힘들다,1
