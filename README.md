@@ -116,16 +116,12 @@ python visualization/teaser_figure.py
 
 ### 6. Interactive figure & dashboard
 
-Output: Teaser figure (interactive HTML)
+Open either file directly in any browser — no server required.
 
-open visualization/teaser_figure.html
-
-# Full interactive dashboard
-open visualization/interactive_dashboard.html
-
-Both are fully standalone — no server required.
-
----
+- `visualization/teaser_figure.html` — Interactive version of Fig. 1
+  (KM trajectories, marginal gain, hazard heatmap, turn-budget Gantt)
+- `visualization/interactive_dashboard.html` — Full interactive dashboard
+  with hover tooltips and coordinated views
 
 ## Key Results
 
