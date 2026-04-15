@@ -116,7 +116,8 @@ python visualization/teaser_figure.py
 
 ### 6. Interactive figure & dashboard
 
-# Output: Teaser figure (interactive HTML)
+Output: Teaser figure (interactive HTML)
+
 open visualization/teaser_figure.html
 
 # Full interactive dashboard
