@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convergent Timing, Divergent Trajectories</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=DM+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ce: #B83030;
+    --ca: #C86848;
+    --cc: #909090;
+    --co: #5A7A90;
+    --cn: #1A4A82;
+    --grid: #f6f6f6;
+    --border: #e8e8e8;
+    --text: #222;
+    --muted: #999;
+    --bg: #ffffff;
+    --panel-bg: #fefefe;
+    --font: 'DM Sans', sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+
+  body {
+    font-family: var(--font);
+    background: #f2f2f0;
+    color: var(--text);
+    padding: 24px;
+    min-height: 100vh;
+  }
+
+  .figure-wrap {
+    max-width: 1320px;
+    margin: 0 auto;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 28px 28px 20px;
+    box-shadow: 0 2px 24px rgba(0,0,0,.06);
+  }
+
+  .fig-header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .fig-title {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    color: #111;
+    line-height: 1.2;
+  }
+  .fig-sub {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 5px;
+    letter-spacing: .01em;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1.65fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 12px;
+    height: 660px;
+  }
+
+  .panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 12px 14px 10px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .panel-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .panel-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 8px;
+    line-height: 1.3;
+  }
+
+  .chart-area { flex: 1; position: relative; min-height: 0; }
+
+  /* ── [C] Heatmap ── */
+  .heatmap-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    justify-content: center;
+    padding: 0 0 4px;
+  }
+  .hmap-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+  }
+  .hmap-label {
+    font-size: 10px;
+    color: #666;
+    width: 72px;
+    text-align: right;
+    flex-shrink: 0;
+    font-weight: 500;
+  }
+  .hmap-bar {
+    flex: 1;
+    height: 100%;
+    border-radius: 2px;
+    position: relative;
+    overflow: visible;
+  }
+  .hmap-canvas { width: 100%; height: 100%; display: block; border-radius: 2px; }
+  .hmap-inline-label {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.92);
+    pointer-events: none;
+    letter-spacing: .02em;
+  }
+  .hmap-axis {
+    display: flex;
+    margin-left: 80px;
+    padding-top: 4px;
+  }
+  .hmap-axis span {
+    flex: 1;
+    text-align: center;
+    font-size: 9px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+  .hmap-xlabel {
+    text-align: center;
+    margin-left: 80px;
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* ── [D] Gantt ── */
+  .gantt-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    justify-content: center;
+    padding: 4px 0 4px;
+  }
+  .gantt-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 42px;
+  }
+  .gantt-label {
+    font-size: 10px;
+    color: #666;
+    width: 72px;
+    text-align: right;
+    flex-shrink: 0;
+    font-weight: 500;
+  }
+  .gantt-track {
+    flex: 1;
+    height: 100%;
+    background: #f4f4f4;
+    border-radius: 2px;
+    position: relative;
+    overflow: visible;
+  }
+  .gantt-pre {
+    position: absolute;
+    top: 0; left: 0; height: 100%;
+    border-radius: 2px;
+    opacity: .18;
+  }
+  .gantt-opt {
+    position: absolute;
+    top: 0; height: 100%;
+    border-radius: 2px;
+    opacity: .88;
+  }
+  .gantt-boundary {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 2px;
+    border-radius: 1px;
+    opacity: .70;
+  }
+  .gantt-val {
+    font-size: 10px;
+    font-weight: 700;
+    flex-shrink: 0;
+    width: 52px;
+    font-family: var(--mono);
+  }
+  .gantt-axis {
+    display: flex;
+    margin-left: 80px;
+    padding-top: 4px;
+  }
+  .gantt-axis span {
+    flex: 1;
+    text-align: center;
+    font-size: 9px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+  .gantt-note {
+    font-size: 9px;
+    color: #bbb;
+    text-align: center;
+    margin-top: 5px;
+    font-style: italic;
+    margin-left: 80px;
+  }
+  .gantt-xlabel {
+    text-align: center;
+    margin-left: 80px;
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* legend */
+  .fig-legend {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .leg-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10.5px;
+    color: #666;
+  }
+  .leg-swatch {
+    width: 20px;
+    height: 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    opacity: .88;
+  }
+
+  .fig-footer {
+    text-align: right;
+    font-size: 9px;
+    color: #ccc;
+    margin-top: 10px;
+    font-style: italic;
+  }
+
+  /* tooltip */
+  .tooltip {
+    position: fixed;
+    background: rgba(20,20,20,.88);
+    color: #fff;
+    font-size: 11px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    pointer-events: none;
+    display: none;
+    z-index: 999;
+    line-height: 1.6;
+    font-family: var(--font);
+  }
+</style>
+</head>
+<body>
+
+<div class="figure-wrap">
+  <div class="fig-header">
+    <div class="fig-title">Convergent Timing, Divergent Trajectories</div>
+    <div class="fig-sub">
+      N=3,236 Korean child counseling sessions &nbsp;·&nbsp;
+      Same median (MSW₅₀=9–11 turns) &nbsp;≠&nbsp; Same long-term outcome
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- [A] KM Curves -->
+    <div class="panel">
+      <div class="panel-label">[A]</div>
+      <div class="panel-title">Cumulative detection &nbsp;1−S(t) &nbsp;· &nbsp;Kaplan–Meier</div>
+      <div class="chart-area"><canvas id="chartA"></canvas></div>
+    </div>
+
+    <!-- [B] Marginal Gain -->
+    <div class="panel">
+      <div class="panel-label">[B]</div>
+      <div class="panel-title">Marginal gain &amp; crisis-adaptive turn-budget</div>
+      <div class="chart-area"><canvas id="chartB"></canvas></div>
+    </div>
+
+    <!-- [C] Heatmap -->
+    <div class="panel">
+      <div class="panel-label">[C]</div>
+      <div class="panel-title">Disclosure intensity h(t) — hazard heatmap</div>
+      <div class="heatmap-wrap" id="heatmapC"></div>
+      <div class="hmap-xlabel">Conversational turn</div>
+    </div>
+
+    <!-- [D] Gantt -->
+    <div class="panel">
+      <div class="panel-label">[D]</div>
+      <div class="panel-title">Crisis-adaptive turn-budget</div>
+      <div class="gantt-wrap" id="ganttD"></div>
+      <div class="gantt-xlabel">Turn budget</div>
+      <div class="gantt-note">■ recommended range &nbsp;·&nbsp; dashed = optimal stopping</div>
+    </div>
+
+  </div>
+
+  <div class="fig-legend">
+    <div class="leg-item"><div class="leg-swatch" style="background:#B83030"></div>Emergency</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:#C86848"></div>Abuse-Suspected</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:#909090"></div>Counseling</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:#5A7A90"></div>Observation</div>
+    <div class="leg-item"><div class="leg-swatch" style="background:#1A4A82"></div>Normal</div>
+  </div>
+  <div class="fig-footer">Kaplan–Meier &nbsp;·&nbsp; GLM session-clustered SE &nbsp;·&nbsp; N=3,236 &nbsp;·&nbsp; IEEE VIS 2026</div>
+</div>
+
+<div class="tooltip" id="tip"></div>
+
+<script>
+const CE='#B83030',CA='#C86848',CC='#909090',CO='#5A7A90',CN='#1A4A82';
+const COLORS=[CE,CA,CC,CO,CN];
+const NAMES=['Emergency','Abuse-Susp.','Counseling','Obs.','Normal'];
+
+const _t=[0,5,10,15,20,25,30,35,40,45,50,60,70,80,90,100,110,120];
+const _E=[0,.30,.54,.65,.75,.81,.87,.90,.93,.95,.97,.975,.980,.985,.990,.993,.996,.998];
+const _A=[0,.32,.56,.63,.70,.77,.83,.87,.90,.93,.95,.960,.970,.975,.980,.987,.992,.997];
+const _C=[0,.27,.47,.57,.66,.72,.78,.82,.86,.89,.91,.930,.945,.955,.965,.975,.985,.990];
+const _O=[0,.22,.41,.48,.55,.61,.66,.71,.75,.79,.83,.850,.870,.880,.895,.910,.935,.960];
+const _N=[0,.21,.40,.45,.50,.54,.58,.63,.68,.70,.72,.775,.830,.865,.900,.935,.960,.975];
+const KMdata=[_E,_A,_C,_O,_N];
+
+// Generate fine timeline
+function interp(xArr,yArr,x){
+  for(let i=0;i<xArr.length-1;i++){
+    if(x>=xArr[i]&&x<=xArr[i+1]){
+      const t=(x-xArr[i])/(xArr[i+1]-xArr[i]);
+      return yArr[i]+t*(yArr[i+1]-yArr[i]);
+    }
+  }
+  return yArr[yArr.length-1];
+}
+const turns=[];
+for(let t=0;t<=120;t+=2) turns.push(t);
+const KM=KMdata.map(d=>turns.map(t=>interp(_t,d,t)));
+
+// ── [A] KM Chart ──────────────────────────────────────────
+const ctxA=document.getElementById('chartA').getContext('2d');
+
+// fill plugin for E-N gap
+const gapFill={
+  id:'gapFill',
+  beforeDatasetsDraw(chart){
+    const{ctx,scales:{x,y}}=chart;
+    if(!x||!y) return;
+    const dsE=chart.data.datasets[0];
+    const dsN=chart.data.datasets[4];
+    ctx.save();
+    ctx.beginPath();
+    // top: E curve
+    dsE.data.forEach((v,i)=>{
+      const px=x.getPixelForValue(turns[i]);
+      const py=y.getPixelForValue(v);
+      i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);
+    });
+    // bottom: N curve reversed
+    for(let i=dsN.data.length-1;i>=0;i--){
+      const px=x.getPixelForValue(turns[i]);
+      const py=y.getPixelForValue(dsN.data[i]);
+      ctx.lineTo(px,py);
+    }
+    ctx.closePath();
+    ctx.fillStyle='rgba(184,48,48,.11)';
+    ctx.fill();
+    ctx.restore();
+  }
+};
+
+// amber band plugin
+const amberBand={
+  id:'amberBand',
+  beforeDatasetsDraw(chart){
+    const{ctx,scales:{x,y},chartArea}=chart;
+    if(!x) return;
+    ctx.save();
+    const x1=x.getPixelForValue(8);
+    const x2=x.getPixelForValue(13);
+    ctx.fillStyle='rgba(245,158,11,.15)';
+    ctx.fillRect(x1,chartArea.top,x2-x1,chartArea.bottom-chartArea.top);
+    // dashed line at 10.5
+    const xm=x.getPixelForValue(10.5);
+    ctx.strokeStyle='rgba(217,119,6,.55)';
+    ctx.lineWidth=0.9;
+    ctx.setLineDash([4,3]);
+    ctx.beginPath(); ctx.moveTo(xm,chartArea.top); ctx.lineTo(xm,chartArea.bottom); ctx.stroke();
+    ctx.setLineDash([]);
+    // T50 dotted
+    const x50=x.getPixelForValue(50);
+    ctx.strokeStyle='rgba(200,200,200,.8)';
+    ctx.lineWidth=0.7;
+    ctx.setLineDash([2,4]);
+    ctx.beginPath(); ctx.moveTo(x50,chartArea.top); ctx.lineTo(x50,chartArea.bottom); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+};
+
+// annotation plugin
+const annotA={
+  id:'annotA',
+  afterDatasetsDraw(chart){
+    const{ctx,scales:{x,y}}=chart;
+    if(!x||!y) return;
+    ctx.save();
+    const x50=x.getPixelForValue(50);
+    const yE=y.getPixelForValue(.97);
+    const yN=y.getPixelForValue(.72);
+    // arrow
+    ctx.strokeStyle='#666';
+    ctx.lineWidth=1.1;
+    ctx.beginPath(); ctx.moveTo(x50,yE+4); ctx.lineTo(x50,yN-4); ctx.stroke();
+    [yE+4,yN-4].forEach((py,i)=>{
+      ctx.beginPath();
+      ctx.moveTo(x50-4,py+(i===0?4:-4));
+      ctx.lineTo(x50,py);
+      ctx.lineTo(x50+4,py+(i===0?4:-4));
+      ctx.stroke();
+    });
+    // 25pp label
+    ctx.font='bold 12px DM Sans, sans-serif';
+    ctx.fillStyle='#333';
+    ctx.textAlign='left';
+    ctx.fillText('25pp gap',x50+8,(yE+yN)/2+4);
+    // 97%
+    ctx.font='bold 12px DM Sans, sans-serif';
+    ctx.fillStyle=CE; ctx.textAlign='right';
+    ctx.fillText('97%',x50-6,yE+4);
+    // 72%
+    ctx.fillStyle=CN;
+    ctx.fillText('72%',x50-6,yN-2);
+    // MSW label
+    const xmsw=x.getPixelForValue(10.5);
+    ctx.font='italic 500 8px DM Sans, sans-serif';
+    ctx.fillStyle='#B45309'; ctx.textAlign='center';
+    ctx.fillText('MSW₅₀ convergence',xmsw,chart.chartArea.top+10);
+    ctx.fillText('(9–11 turns)',xmsw,chart.chartArea.top+20);
+    // rapid saturation
+    ctx.font='italic 7px DM Sans, sans-serif';
+    ctx.fillStyle=CE; ctx.textAlign='left';
+    const xrs=x.getPixelForValue(72);
+    ctx.fillText('↑ rapid saturation',xrs,y.getPixelForValue(.998)+2);
+    ctx.fillStyle=CN;
+    ctx.fillText('→ gradual accumulation',xrs,y.getPixelForValue(.878)+2);
+    // Emergency/Normal end labels
+    ctx.font='bold 9px DM Sans, sans-serif';
+    const xend=x.getPixelForValue(117);
+    ctx.fillStyle=CE; ctx.textAlign='right';
+    ctx.fillText('Emergency',xend,y.getPixelForValue(interp(_t,_E,117))-4);
+    ctx.fillStyle=CN;
+    ctx.fillText('Normal',xend,y.getPixelForValue(interp(_t,_N,117))+12);
+    // log-rank
+    ctx.font='italic 7px DM Mono, monospace';
+    ctx.fillStyle='#ccc'; ctx.textAlign='left';
+    ctx.fillText('Log-rank: χ²=45.1, p<.001',chart.chartArea.left+2,chart.chartArea.bottom-3);
+    ctx.restore();
+  }
+};
+
+new Chart(ctxA,{
+  type:'line',
+  data:{
+    labels:turns,
+    datasets:NAMES.map((nm,i)=>({
+      label:nm,
+      data:KM[i],
+      borderColor:i===0||i===4?COLORS[i]:'#d8d8d8',
+      borderWidth:i===0||i===4?2.6:0.8,
+      borderDash:i===0||i===4?[]:[3,4],
+      pointRadius:0,
+      tension:.35,
+      fill:false,
+      borderOpacity:i===0||i===4?1:.3,
+    }))
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    animation:{duration:800},
+    interaction:{mode:'index',intersect:false},
+    plugins:{
+      legend:{display:false},
+      tooltip:{
+        callbacks:{
+          label:ctx=>`${ctx.dataset.label}: ${(ctx.raw*100).toFixed(1)}%`
+        }
+      }
+    },
+    scales:{
+      x:{
+        type:'linear',min:0,max:120,
+        ticks:{stepSize:20,font:{size:8.5},color:'#aaa'},
+        grid:{color:'#f4f4f4'},border:{color:'#e0e0e0'},
+        title:{display:true,text:'Conversational turn',font:{size:10},color:'#999'}
+      },
+      y:{
+        min:0,max:1.12,
+        ticks:{
+          callback:v=>v<=1?(v*100).toFixed(0)+'%':'',
+          stepSize:.2,font:{size:8.5},color:'#aaa'
+        },
+        grid:{color:'#f4f4f4'},border:{color:'#e0e0e0'},
+        title:{display:true,text:'Cumulative detection',font:{size:10},color:'#999'}
+      }
+    }
+  },
+  plugins:[gapFill,amberBand,annotA]
+});
+
+// ── [B] Marginal Gain ──────────────────────────────────────
+const MGT=[10,20,30,40,50,60,70,80,90,100];
+const MGE=[5.5,3.8,2.2,1.1,.6,.2,.12,.08,.04,.02];
+const MGN=[3.8,2.5,1.6,1.3,.9,.7,.55,.44,.34,.26];
+const ctxB=document.getElementById('chartB').getContext('2d');
+
+const zonePlug={
+  id:'zonePlug',
+  beforeDatasetsDraw(chart){
+    const{ctx,scales:{x,y},chartArea}=chart;
+    if(!x) return;
+    ctx.save();
+    // stop zone
+    const xs1=x.getPixelForValue(25),xs2=x.getPixelForValue(35);
+    ctx.fillStyle='rgba(184,48,48,.10)';
+    ctx.fillRect(xs1,chartArea.top,xs2-xs1,chartArea.bottom-chartArea.top);
+    // cont zone
+    const xc1=x.getPixelForValue(83),xc2=x.getPixelForValue(100);
+    ctx.fillStyle='rgba(26,74,130,.08)';
+    ctx.fillRect(xc1,chartArea.top,xc2-xc1,chartArea.bottom-chartArea.top);
+    // T50 dotted
+    const x50=x.getPixelForValue(50);
+    ctx.strokeStyle='rgba(200,200,200,.8)';ctx.lineWidth=.7;ctx.setLineDash([2,4]);
+    ctx.beginPath();ctx.moveTo(x50,chartArea.top);ctx.lineTo(x50,chartArea.bottom);ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+};
+
+const annotB={
+  id:'annotB',
+  afterDatasetsDraw(chart){
+    const{ctx,scales:{x,y},chartArea}=chart;
+    if(!x) return;
+    ctx.save();
+    ctx.font='bold 8px DM Sans, sans-serif';
+    const xs=(x.getPixelForValue(25)+x.getPixelForValue(35))/2;
+    ctx.fillStyle=CE; ctx.textAlign='center';
+    ctx.fillText('Optimal',xs,chartArea.top+12);
+    ctx.fillText('stopping',xs,chartArea.top+22);
+    const xc=(x.getPixelForValue(83)+x.getPixelForValue(100))/2;
+    ctx.font='bold 7.5px DM Sans, sans-serif';
+    ctx.fillStyle=CN;
+    ctx.fillText('Recommended',xc,chartArea.top+12);
+    ctx.fillText('extension',xc,chartArea.top+22);
+    ctx.restore();
+  }
+};
+
+new Chart(ctxB,{
+  type:'line',
+  data:{
+    labels:MGT,
+    datasets:[
+      {label:'Emergency',data:MGE,borderColor:CE,borderWidth:1.8,
+       pointRadius:4,pointBackgroundColor:CE,tension:.3,fill:false},
+      {label:'Normal',data:MGN,borderColor:CN,borderWidth:1.8,
+       pointRadius:4,pointBackgroundColor:CN,tension:.3,fill:false}
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    animation:{duration:800},
+    plugins:{
+      legend:{display:true,position:'top',align:'end',
+        labels:{font:{size:9},color:'#888',usePointStyle:true,pointStyle:'circle',boxWidth:8,padding:10}},
+      tooltip:{callbacks:{label:ctx=>`${ctx.dataset.label}: ${ctx.raw.toFixed(2)}%`}}
+    },
+    scales:{
+      x:{type:'linear',min:0,max:120,
+        ticks:{stepSize:20,font:{size:8.5},color:'#aaa'},
+        grid:{color:'#f4f4f4'},border:{color:'#e0e0e0'},
+        title:{display:true,text:'Turn budget',font:{size:10},color:'#999'}
+      },
+      y:{min:0,max:7,
+        ticks:{callback:v=>v+'%',font:{size:8.5},color:'#aaa'},
+        grid:{color:'#f4f4f4'},border:{color:'#e0e0e0'},
+        title:{display:true,text:'Gain',font:{size:10},color:'#999'}
+      }
+    }
+  },
+  plugins:[zonePlug,annotB]
+});
+
+// ── [C] Heatmap ───────────────────────────────────────────
+const hmap=document.getElementById('heatmapC');
+const HZ_T=[5,10,15,20,25,30,40,50,60,70,80,90,100,110,120];
+const HZ={
+  Emergency:[.090,.100,.095,.065,.040,.025,.012,.006,.004,.003,.002,.002,.001,.001,.001],
+  'Abuse-Susp.':[.080,.090,.088,.058,.036,.022,.010,.005,.003,.002,.002,.001,.001,.001,.001],
+  Counseling:[.055,.065,.068,.048,.034,.024,.014,.009,.006,.004,.003,.003,.002,.002,.001],
+  'Obs.':[.048,.058,.060,.044,.031,.022,.013,.008,.005,.004,.003,.002,.002,.001,.001],
+  Normal:[.035,.040,.042,.038,.034,.030,.026,.022,.018,.015,.013,.011,.009,.007,.006]
+};
+const hmax=.100;
+const INLINE={'Emergency':'Front-loaded','Normal':'Sustained'};
+
+Object.entries(HZ).forEach(([nm,hz],idx)=>{
+  const row=document.createElement('div');
+  row.className='hmap-row';
+  const lbl=document.createElement('div');
+  lbl.className='hmap-label'; lbl.textContent=nm;
+  const bar=document.createElement('div');
+  bar.className='hmap-bar';
+  const cvs=document.createElement('canvas');
+  cvs.className='hmap-canvas'; cvs.height=36;
+  bar.appendChild(cvs);
+  if(INLINE[nm]){
+    const il=document.createElement('div');
+    il.className='hmap-inline-label';
+    il.textContent=INLINE[nm];
+    // Front-loaded: left side (high intensity zone)
+    // Sustained: right-center (where Normal stays active)
+    if(nm==='Emergency'){
+      il.style.left='8px';
+    } else {
+      il.style.left='55%';
+    }
+    bar.appendChild(il);
+  }
+  row.appendChild(lbl); row.appendChild(bar);
+  hmap.appendChild(row);
+
+  requestAnimationFrame(()=>{
+    cvs.width=cvs.offsetWidth||400;
+    const ctx=cvs.getContext('2d');
+    const W=cvs.width, H=cvs.height;
+    const col=COLORS[idx];
+    const r=parseInt(col.slice(1,3),16);
+    const g=parseInt(col.slice(3,5),16);
+    const b=parseInt(col.slice(5,7),16);
+    // continuous gradient via interpolation
+    for(let px=0;px<W;px++){
+      const t=(px/W)*120+5;
+      // find hz value at t
+      let hv=hz[hz.length-1];
+      for(let i=0;i<HZ_T.length-1;i++){
+        if(t>=HZ_T[i]&&t<=HZ_T[i+1]){
+          const frac=(t-HZ_T[i])/(HZ_T[i+1]-HZ_T[i]);
+          hv=hz[i]+frac*(hz[i+1]-hz[i]);
+          break;
+        }
+      }
+      const alpha=0.07+(hv/hmax)*0.91;
+      ctx.fillStyle=`rgba(${r},${g},${b},${Math.min(1,alpha)})`;
+      ctx.fillRect(px,0,1,H);
+    }
+  });
+});
+
+// axis ticks
+const axRow=document.createElement('div');
+axRow.className='hmap-axis';
+[0,20,40,60,80,100,120].forEach(v=>{
+  const sp=document.createElement('span'); sp.textContent=v;
+  axRow.appendChild(sp);
+});
+hmap.appendChild(axRow);
+
+// ── [D] Gantt ─────────────────────────────────────────────
+const gantt=document.getElementById('ganttD');
+const STRIPS=[
+  {nm:'Emergency',col:CE,r0:20,r1:30},
+  {nm:'Abuse-Susp.',col:CA,r0:30,r1:50},
+  {nm:'Counseling',col:CC,r0:50,r1:80},
+  {nm:'Obs.',col:CO,r0:50,r1:80},
+  {nm:'Normal',col:CN,r0:80,r1:100}
+];
+const MAX=120;
+
+STRIPS.forEach(({nm,col,r0,r1})=>{
+  const row=document.createElement('div');
+  row.className='gantt-row';
+  const lbl=document.createElement('div');
+  lbl.className='gantt-label'; lbl.textContent=nm;
+  const track=document.createElement('div');
+  track.className='gantt-track';
+  // pre zone
+  const pre=document.createElement('div');
+  pre.className='gantt-pre';
+  pre.style.cssText=`width:${r0/MAX*100}%;background:${col}`;
+  // optimal zone
+  const opt=document.createElement('div');
+  opt.className='gantt-opt';
+  opt.style.cssText=`left:${r0/MAX*100}%;width:${(r1-r0)/MAX*100}%;background:${col}`;
+  // boundary
+  const bnd=document.createElement('div');
+  bnd.className='gantt-boundary';
+  bnd.style.cssText=`left:${r1/MAX*100}%;background:${col};top:0;bottom:0`;
+  track.appendChild(pre); track.appendChild(opt); track.appendChild(bnd);
+  const val=document.createElement('div');
+  val.className='gantt-val';
+  val.style.color=col; val.textContent=`${r0}–${r1} t`;
+  row.appendChild(lbl); row.appendChild(track); row.appendChild(val);
+  gantt.appendChild(row);
+});
+
+const axD=document.createElement('div'); axD.className='gantt-axis';
+[0,20,40,60,80,100,120].forEach(v=>{
+  const sp=document.createElement('span'); sp.textContent=v;
+  axD.appendChild(sp);
+});
+gantt.appendChild(axD);
+</script>
+</body>
+</html>
