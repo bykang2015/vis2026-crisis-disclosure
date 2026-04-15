@@ -49,8 +49,9 @@ vis2026-crisis-disclosure/
 │   └── keyword_anchoring.py     Exact + semantic temporal anchoring pipeline
 │
 ├── visualization/
-│   ├── teaser_figure.py         Four-view matplotlib figure (Fig. 1)
-│   └── interactive_dashboard.html  Standalone interactive HTML (no server)
+│   ├── teaser_figure.py            Four-view matplotlib figure (Fig. 1)
+│   ├── teaser_figure.html          Interactive HTML version of Fig. 1
+│   └── interactive_dashboard.html  Standalone interactive dashboard (no server)
 │
 └── results/
     ├── full_detection_table.csv  Cumulative detection T5–T100
@@ -113,10 +114,15 @@ python visualization/teaser_figure.py
 # Output: results/figure_teaser.png, results/figure_teaser.pdf
 ```
 
-### 6. Interactive dashboard
+### 6. Interactive figure & dashboard
 
-Open `visualization/interactive_dashboard.html` in any browser.
-No server required — fully standalone.
+# Output: Teaser figure (interactive HTML)
+open visualization/teaser_figure.html
+
+# Full interactive dashboard
+open visualization/interactive_dashboard.html
+
+Both are fully standalone — no server required.
 
 ---
 
