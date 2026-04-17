@@ -1,6 +1,10 @@
 # Convergent Timing, Divergent Trajectories
 ## Visualizing the Temporal Paradox of Child Crisis Disclosure
 
+> Paper: *"When Medians Mislead: Revealing Hidden Temporal
+> Structure in Child Crisis Disclosure"*
+> IEEE VIS 2026 Short Paper (under review)
+
 **Anonymous Submission — IEEE VIS 2026 Short Papers**
 
 > Across 3,236 Korean child counseling sessions, aggregate statistics suggest
