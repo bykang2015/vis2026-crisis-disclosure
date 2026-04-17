@@ -1,0 +1,11 @@
+turn,marginal_gain_emergency,marginal_gain_normal,ratio_normal_emergency,note
+10,4.800,3.800,0.792,Emergency dominates
+20,2.100,1.000,0.476,Emergency dominates
+30,1.200,0.800,0.667,Emergency dominates
+40,0.850,0.750,0.882,Emergency dominates
+45,,,1.000,Crossover (interpolated)
+50,0.500,0.700,1.400,Normal dominates
+60,0.280,0.600,2.143,Normal dominates
+70,0.170,0.530,3.118,Normal dominates
+80,0.067,0.467,6.970,Normal dominates
+90,0.033,0.433,13.121,Normal dominates
