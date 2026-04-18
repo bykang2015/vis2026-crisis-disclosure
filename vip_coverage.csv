@@ -1,0 +1,7 @@
+crisis_level,N,T30_rate,T100_rate,VIP_coverage,VIP_avg_turns,note
+Emergency,672,0.87,0.99,0.99,43.9,detected_early=terminate_T30
+Abuse-Susp.,644,0.83,0.99,0.99,45.1,detected_early=terminate_T30
+Counseling,621,0.78,0.98,0.98,47.6,detected_early=terminate_T30
+Observation,634,0.66,0.94,0.94,54.0,detected_early=terminate_T30
+Normal,665,0.58,0.94,0.94,57.4,detected_early=terminate_T30
+TOTAL (weighted),3236,,,0.969,47.9,weighted_avg_across_groups
