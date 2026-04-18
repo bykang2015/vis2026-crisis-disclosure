@@ -62,8 +62,7 @@ vis2026-crisis-disclosure/
 │
 ├── visualization/
 │   ├── teaser_figure.html           Four-view interactive figure (Fig. 1) — open in browser
-│   └── interactive_dashboard.html   Standalone interactive dashboard (no server)
-│
+│   │
 └── results/
     ├── full_detection_table.csv     Cumulative detection T5–T100
     ├── marginal_gains.csv           Per-turn marginal gain by crisis level
