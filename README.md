@@ -181,13 +181,6 @@ google-chrome --headless --screenshot=results/figure_teaser.png \
     --window-size=1280,700 visualization/teaser_figure.html
 ```
 
-### 7. Interactive dashboard
-
-```bash
-open visualization/interactive_dashboard.html
-```
-
----
 
 ## Key Results
 
