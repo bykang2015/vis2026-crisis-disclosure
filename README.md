@@ -12,8 +12,10 @@ Across 3,236 Korean child counseling sessions, aggregate statistics suggest near
 disclosure timing (MSW₅₀ = 9–11 turns). **This conclusion is wrong.**
 Visualizing full temporal trajectories reveals a **25pp detection gap** between Emergency (97%)
 and Normal (72%) cases at Turn 50 — invisible in any tabular summary.
-A gain-ratio crossover at ~Turn 45 (13× by Turn 90) operationalizes crisis-adaptive turn
-budgets that reduce undetected Normal sessions from **42% → 6%** (85.7% gap recovery).
+A gain-ratio crossover at ~Turn 45 (13× by Turn 90) generates the **Visually-Informed
+Protocol (VIP)**: a binary T30-rule requiring no prior knowledge of crisis level that reduces
+undetected Normal sessions from **42% → 6%** at lower cost than oracle bounds
+(47.9t vs. 67.8t, 85.7% gap recovery).
 
 ---
 
@@ -54,7 +56,9 @@ vis2026-crisis-disclosure/
 ├── analysis/
 │   ├── survival_analysis.py         KM estimation, log-rank, GLM hazard models,
 │   │                                marginal gain computation, gain ratio export
-│   └── keyword_anchoring.py         Exact + semantic temporal anchoring pipeline
+│   ├── keyword_anchoring.py         Exact + semantic temporal anchoring pipeline
+│   └── vip_simulation.py            VIP (T30-rule) simulation: per-group coverage,
+│                                    weighted average turns, gap recovery (NEW)
 │
 ├── visualization/
 │   ├── teaser_figure.html           Four-view interactive figure (Fig. 1) — open in browser
@@ -64,6 +68,7 @@ vis2026-crisis-disclosure/
     ├── full_detection_table.csv     Cumulative detection T5–T100
     ├── marginal_gains.csv           Per-turn marginal gain by crisis level
     ├── gain_ratio.csv               Normal/Emergency gain ratio + crossover (NEW)
+    ├── vip_coverage.csv             VIP per-group coverage + avg turns (NEW)
     └── glm_coefficients.csv         GLM hazard model coefficients
 ```
 
@@ -130,7 +135,29 @@ ratio(t) = marginal_gain_Normal(t) / marginal_gain_Emergency(t)
 where `marginal_gain(t) = [1−S(t)] − [1−S(t−10)]`.
 Crossover (~Turn 45) is printed to stdout and logged in `gain_ratio.csv`.
 
-### 5. View teaser figure (Fig. 1)
+### 5. Run VIP simulation (**NEW**)
+
+```bash
+python analysis/vip_simulation.py \
+    --sessions data/synthetic_sessions.csv
+```
+
+Outputs:
+- `results/vip_coverage.csv` — Per-group coverage, average turns, gap recovery
+
+The VIP (Visually-Informed Protocol) applies a binary T30-rule:
+
+```
+If keyword detected by Turn 30 → terminate at Turn 30
+Else                            → extend to Turn 100
+```
+
+This rule, derived from View D's efficiency crossover, achieves:
+- **94% Normal coverage** (vs. 72% Uniform-50)
+- **47.9t average turns** (vs. 67.8t oracle)
+- **85.7% gap recovery** = (94−58)/(100−58)
+
+### 6. View teaser figure (Fig. 1)
 
 Open directly in any modern browser — no server required:
 
@@ -141,10 +168,10 @@ open visualization/teaser_figure.html
 The interactive figure includes four coordinated views:
 - **(A)** Slope chart: convergence paradox (Turn 10 vs. Turn 50)
 - **(B)** Hazard heatmap: front-loaded vs. sustained disclosure intensity
-- **(C)** Crisis-adaptive turn-budget Gantt chart
-- **(D)** Relative efficiency analysis: Normal/Emergency gain ratio on log scale
+- **(C)** Protocol efficiency frontier: VIP vs. Uniform baselines vs. Oracle
+- **(D)** Relative efficiency: Normal/Emergency gain ratio on log scale
 
-For static PNG export (e.g., for paper submission):
+For static PNG export:
 
 ```bash
 # Option 1: browser screenshot (recommended)
@@ -155,13 +182,11 @@ google-chrome --headless --screenshot=results/figure_teaser.png \
     --window-size=1280,700 visualization/teaser_figure.html
 ```
 
-### 6. Interactive dashboard
+### 7. Interactive dashboard
 
 ```bash
 open visualization/interactive_dashboard.html
 ```
-
-Full interactive dashboard with hover tooltips and coordinated views.
 
 ---
 
@@ -180,7 +205,7 @@ Full interactive dashboard with hover tooltips and coordinated views.
 The **25pp gap at Turn 50** is invisible in the MSW₅₀ column.
 Log-rank: χ²=45.1, p<.001.
 
-### Relative Efficiency Analysis (View D) — NEW
+### Relative Efficiency Analysis (View D)
 
 | Turn | Emergency (%/t) | Normal (%/t) | Ratio |
 |---|---|---|---|
@@ -195,20 +220,20 @@ Log-rank: χ²=45.1, p<.001.
 | 80 | 0.067 | 0.467 | 6.97× |
 | 90 | 0.033 | 0.433 | **13.1×** |
 
-Beyond ~Turn 45, continued engagement in Normal sessions is up to **13× more efficient**
-per turn than Emergency sessions. This directly justifies crisis-adaptive turn budgets.
+Beyond ~Turn 45, Normal sessions are up to **13× more efficient** per turn than Emergency.
+This crossover directly generates VIP.
 
-### Crisis-Adaptive Protocol: Counterfactual Simulation
+### Protocol Comparison (View C Efficiency Frontier)
 
-| Protocol | Avg turns | Undetected Normal |
-|---|---|---|
-| Uniform-30 (current practice) | 30 t | 42% |
-| Uniform-50 | 50 t | 28% |
-| **Crisis-Adaptive** | **67.8 t** | **6%** |
+| Protocol | Avg turns | Normal coverage | Undetected | Gap recovery |
+|---|---|---|---|---|
+| Uniform-30 | 30 t | 58% | 42% | — |
+| Uniform-50 | 50 t | 72% | 28% | — |
+| **VIP ★** | **47.9 t** | **94%** | **6%** | **85.7%** |
+| Crisis-Adaptive† | 67.8 t | 94% | 6% | 85.7% |
 
-Crisis-Adaptive recovers **85.7% of the detection gap** = (94−58)/(100−58).
-The additional 37.8 turns vs. Uniform-30 represent re-allocation from Emergency
-(saturated at turn 30) to Normal (sustained marginal gain through turn 100).
+★ VIP (Visually-Informed Protocol): binary T30-rule, no prior knowledge of crisis level required.
+† Oracle upper bound: crisis level assumed known.
 
 ### Crisis-Adaptive Turn-Budget Recommendations
 
