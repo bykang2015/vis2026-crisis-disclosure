@@ -314,17 +314,24 @@ const frontierPlugin={id:'frontierLine',afterDatasetsDraw(chart){
   ctx.strokeStyle='rgba(192,57,43,0.15)';
   ctx.lineWidth=4; ctx.stroke();
 
-  // −19.9t arrow — bold and clear
+  // −19.9t bidirectional arrow
   ctx.strokeStyle='rgba(192,57,43,0.72)';
   ctx.lineWidth=2;
   ctx.beginPath();
   ctx.moveTo(vx+18,vy); ctx.lineTo(ox-12,oy);
   ctx.stroke();
+  // Right arrowhead (→ Oracle)
   ctx.fillStyle='rgba(192,57,43,0.72)';
   ctx.beginPath();
   ctx.moveTo(ox-12,oy);
   ctx.lineTo(ox-20,oy-5);
   ctx.lineTo(ox-20,oy+5);
+  ctx.closePath(); ctx.fill();
+  // Left arrowhead (← VIP)
+  ctx.beginPath();
+  ctx.moveTo(vx+18,vy);
+  ctx.lineTo(vx+26,vy-5);
+  ctx.lineTo(vx+26,vy+5);
   ctx.closePath(); ctx.fill();
 
   // −19.9t label
