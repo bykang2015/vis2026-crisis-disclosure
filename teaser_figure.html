@@ -162,17 +162,13 @@ body{font-family:-apple-system,'Helvetica Neue',sans-serif;background:var(--bg);
   <div class="plbl">[B]</div>
   <div class="ptit">Disclosure intensity h(t) — hazard heatmap</div>
   <div class="hmap-body" id="hmapB"></div>
-  <!-- Color scale -->
-  <div class="hscale-row" id="hscaleRow">
-    <div class="hscale-title" style="font-size:7px;color:#aaa;margin-right:4px">Intensity:</div>
-    <div style="font-size:7.5px;color:#bbb;margin-right:3px">Low</div>
-    <div class="hscale-bar" id="hscaleBar"></div>
-    <div style="font-size:7.5px;color:#777;margin-left:3px">High</div>
-  </div>
-  <div style="display:flex;margin-left:80px;margin-top:1px">
-    <div style="flex:1;text-align:left;font-size:7px;color:#ccc;font-family:monospace">0</div>
-    <div style="flex:1;text-align:center;font-size:7px;color:#ccc;font-family:monospace">60</div>
-    <div style="flex:1;text-align:right;font-size:7px;color:#ccc;font-family:monospace">120</div>
+  <!-- Color scale — aligned to heatmap rows -->
+  <div style="display:flex;align-items:center;margin-left:80px;margin-top:4px;gap:4px">
+    <div style="font-size:7px;color:#aaa;white-space:nowrap">Intensity: Low</div>
+    <div style="flex:1;position:relative;height:6px">
+      <canvas id="hscaleBar" style="position:absolute;top:0;left:0;width:100%;height:100%;border-radius:3px"></canvas>
+      <div style="position:absolute;right:3px;top:50%;transform:translateY(-50%);font-size:6.5px;color:rgba(255,255,255,0.75);font-weight:600;pointer-events:none">High</div>
+    </div>
   </div>
   <div class="haxis" id="haxisB"></div>
   <div class="hxlbl">Conversational turn</div>
@@ -181,7 +177,7 @@ body{font-family:-apple-system,'Helvetica Neue',sans-serif;background:var(--bg);
 <!-- ═══ [C] EFFICIENCY FRONTIER ═══ -->
 <div class="panel">
   <div class="plbl">[C]</div>
-  <div class="ptit">Protocol efficiency frontier (VIP = Heuristic T30-rule)</div>
+  <div class="ptit">Protocol efficiency frontier (VIP: Visually-Informed Protocol)</div>
   <div class="d-area"><canvas id="cC"></canvas></div>
 </div>
 
@@ -289,64 +285,77 @@ const frontierPlugin={id:'frontierLine',afterDatasetsDraw(chart){
   const{ctx,scales:{x,y},chartArea:ca}=chart; if(!x||!y)return;
   ctx.save();
 
-  // Efficiency frontier line connecting Pareto-optimal points
-  // U10→U20→U30→U50→VIP (VIP dominates Oracle)
+  // 94% reference line
+  const y94=y.getPixelForValue(94);
+  ctx.strokeStyle='rgba(192,57,43,0.18)';
+  ctx.lineWidth=0.8; ctx.setLineDash([4,4]);
+  ctx.beginPath(); ctx.moveTo(ca.left,y94); ctx.lineTo(ca.right,y94); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Frontier line — U10→U20→U30→U50→VIP (all 5 points connected)
   const frontier=[
     {t:10,c:40},{t:20,c:50},{t:30,c:58},{t:50,c:72},{t:47.9,c:94}
   ].sort((a,b)=>a.t-b.t);
   ctx.beginPath();
-  ctx.strokeStyle='rgba(80,80,80,0.45)';
-  ctx.lineWidth=1; ctx.setLineDash([4,3]);
+  ctx.strokeStyle='rgba(100,100,100,0.35)';
+  ctx.lineWidth=1.2; ctx.setLineDash([5,4]);
   frontier.forEach((p,i)=>{
     const px2=x.getPixelForValue(p.t), py2=y.getPixelForValue(p.c);
     i===0?ctx.moveTo(px2,py2):ctx.lineTo(px2,py2);
   });
   ctx.stroke(); ctx.setLineDash([]);
 
-  // "Efficiency frontier" label
-  ctx.font='7px sans-serif'; ctx.fillStyle='#888';
-  ctx.textAlign='center';
-  ctx.fillText('← efficiency frontier',x.getPixelForValue(35),y.getPixelForValue(66));
-
-  // VIP star annotation
   const vx=x.getPixelForValue(47.9), vy=y.getPixelForValue(94);
-  ctx.font='bold 9px sans-serif'; ctx.fillStyle='#C0392B';
-  ctx.textAlign='left';
-  ctx.fillText('VIP ★ (Heuristic)',vx+8,vy-6);
-  ctx.font='7px sans-serif'; ctx.fillStyle='#C0392B';
-  ctx.fillText('47.9t · 94% Normal',vx+8,vy+5);
-
-  // Oracle annotation
   const ox=x.getPixelForValue(67.8), oy=y.getPixelForValue(94);
-  ctx.font='7px sans-serif'; ctx.fillStyle='#5B7FA6';
-  ctx.textAlign='left';
-  ctx.fillText('Oracle†',ox+6,oy-4);
-  ctx.fillStyle='#777';
-  ctx.fillText('67.8t · 94%',ox+6,oy+6);
 
-  // "Same coverage, lower cost" arrow
-  ctx.strokeStyle='rgba(192,57,43,0.45)';
-  ctx.lineWidth=1;
+  // VIP glow ring
   ctx.beginPath();
-  ctx.moveTo(ox-4,oy); ctx.lineTo(vx+16,vy);
-  ctx.stroke();
-  ctx.font='bold 7px sans-serif'; ctx.fillStyle='rgba(192,57,43,0.85)';
-  ctx.textAlign='center';
-  ctx.fillText('−19.9t',((ox-4)+(vx+16))/2,(oy+vy)/2-7);
+  ctx.arc(vx,vy,17,0,Math.PI*2);
+  ctx.strokeStyle='rgba(192,57,43,0.15)';
+  ctx.lineWidth=4; ctx.stroke();
 
-  // 94% horizontal reference line
-  const y94=y.getPixelForValue(94);
-  ctx.strokeStyle='rgba(192,57,43,0.40)';
-  ctx.lineWidth=0.8; ctx.setLineDash([3,3]);
-  ctx.beginPath(); ctx.moveTo(ca.left,y94); ctx.lineTo(ca.right,y94); ctx.stroke();
-  ctx.setLineDash([]);
+  // −19.9t arrow — bold and clear
+  ctx.strokeStyle='rgba(192,57,43,0.72)';
+  ctx.lineWidth=2;
+  ctx.beginPath();
+  ctx.moveTo(vx+18,vy); ctx.lineTo(ox-12,oy);
+  ctx.stroke();
+  ctx.fillStyle='rgba(192,57,43,0.72)';
+  ctx.beginPath();
+  ctx.moveTo(ox-12,oy);
+  ctx.lineTo(ox-20,oy-5);
+  ctx.lineTo(ox-20,oy+5);
+  ctx.closePath(); ctx.fill();
+
+  // −19.9t label
+  ctx.font='bold 8.5px sans-serif';
+  ctx.fillStyle='#C0392B';
+  ctx.textAlign='center';
+  ctx.fillText('−19.9t saved',((vx+18)+(ox-12))/2, oy-12);
+
+  // VIP label — bold, centered above star
+  ctx.font='bold 11px sans-serif';
+  ctx.fillStyle='#C0392B';
+  ctx.textAlign='center';
+  ctx.fillText('VIP', vx, vy-26);
+  ctx.font='7.5px sans-serif';
+  ctx.fillStyle='rgba(192,57,43,0.75)';
+  ctx.fillText('47.9t · 94%', vx, vy-14);
+
+  // Oracle — clearly muted
+  ctx.font='7px sans-serif';
+  ctx.fillStyle='#aaa';
+  ctx.textAlign='left';
+  ctx.fillText('Oracle †', ox+9, oy-3);
+  ctx.fillStyle='#ccc';
+  ctx.fillText('67.8t · 94%', ox+9, oy+9);
+
   ctx.restore();
 }};
 
 new Chart(document.getElementById('cC'),{
   type:'scatter',
   data:{datasets:[
-    // Uniform protocols
     {label:'Uniform',
      data:[
        {x:10,y:40,label:'U-10'},
@@ -354,19 +363,21 @@ new Chart(document.getElementById('cC'),{
        {x:30,y:58,label:'U-30'},
        {x:50,y:72,label:'U-50'},
      ],
-     backgroundColor:'rgba(100,100,100,0.70)',
-     pointRadius:6, pointHoverRadius:8,
+     backgroundColor:'rgba(140,140,140,0.55)',
+     borderColor:'rgba(0,0,0,0)',
+     pointRadius:5.5, pointHoverRadius:7,
      pointStyle:'circle'},
-    // VIP
-    {label:'VIP (ours)',
+    {label:'VIP',
      data:[{x:47.9,y:94}],
-     backgroundColor:'rgba(192,57,43,0.92)',
-     pointRadius:10, pointHoverRadius:12,
+     backgroundColor:'rgba(192,57,43,1.0)',
+     borderColor:'rgba(255,255,255,0.9)',
+     borderWidth:1.5,
+     pointRadius:14, pointHoverRadius:16,
      pointStyle:'star'},
-    // Oracle
     {label:'Oracle†',
      data:[{x:67.8,y:94}],
-     backgroundColor:'rgba(91,127,166,0.85)',
+     backgroundColor:'rgba(165,180,200,0.65)',
+     borderColor:'rgba(0,0,0,0)',
      pointRadius:7, pointHoverRadius:9,
      pointStyle:'triangle'},
   ]},
@@ -384,24 +395,25 @@ new Chart(document.getElementById('cC'),{
     scales:{
       x:{min:0,max:85,
          ticks:{stepSize:20,font:{size:8},color:'#777'},
-         grid:{color:'#f0f0f0'},border:{color:'#ddd'},
-         title:{display:true,text:'Avg turns (cost)',font:{size:8.5},color:'#777'}},
+         grid:{color:'#f2f2f2'},border:{color:'#ddd'},
+         title:{display:true,text:'Avg turns (cost →)',font:{size:8.5},color:'#666'}},
       y:{min:35,max:100,
          ticks:{callback:v=>v+'%',font:{size:8},color:'#777'},
-         grid:{color:'#f0f0f0'},border:{color:'#ddd'},
-         title:{display:true,text:'Normal coverage',font:{size:8.5},color:'#777'}}
+         grid:{color:'#f2f2f2'},border:{color:'#ddd'},
+         title:{display:true,text:'Normal coverage',font:{size:8.5},color:'#666'}}
     }
   },
   plugins:[frontierPlugin]
 });
 
-// ── Uniform label annotations (drawn after chart init) ──────
+// Uniform labels
 setTimeout(()=>{
   const chart=Chart.getChart('cC');
   if(!chart)return;
   const{ctx,scales:{x,y}}=chart;
   ctx.save();
-  ctx.font='7.5px sans-serif'; ctx.fillStyle='#555';
+  ctx.font='7px sans-serif';
+  ctx.fillStyle='#999';
   ctx.textAlign='center';
   [{t:10,c:40,l:'U-10'},{t:20,c:50,l:'U-20'},
    {t:30,c:58,l:'U-30'},{t:50,c:72,l:'U-50'}].forEach(p=>{
@@ -414,7 +426,7 @@ setTimeout(()=>{
 window.addEventListener('load',()=>{
 
   // [B] Heatmap
-  const GLOBAL_MAX=0.100;
+  // [B] Heatmap — per-row normalized + grid lines + peak markers
   hcanvases.forEach(({cvs,wrap,i})=>{
     const W=wrap.clientWidth, H=wrap.clientHeight;
     if(!W||!H) return;
@@ -423,12 +435,21 @@ window.addEventListener('load',()=>{
     const col=COLS[i];
     const r=parseInt(col.slice(1,3),16),g=parseInt(col.slice(3,5),16),b=parseInt(col.slice(5,7),16);
     const hz=HZ[i];
+
+    // Per-row max for normalization — makes within-row variation visible
+    let rowMax=0;
+    for(let t=0;t<=120;t+=1) rowMax=Math.max(rowMax,interpHz(hz,t));
+
     const imgData=ctx.createImageData(W,H);
     for(let px=0;px<W;px++){
       const t=(px/W)*120;
       const hv=interpHz(hz,t);
-      const norm=Math.min(1,hv/GLOBAL_MAX);
-      const alpha=Math.round(255*(0.06+Math.pow(norm,0.55)*0.90));
+      // Blend: 60% per-row norm (shows within-group decay) +
+      //        40% global norm (preserves between-group contrast)
+      const normRow=Math.min(1,hv/rowMax);
+      const normGlobal=Math.min(1,hv/0.100);
+      const norm=0.6*normRow + 0.4*normGlobal;
+      const alpha=Math.round(255*(0.08+Math.pow(norm,0.45)*0.88));
       for(let py=0;py<H;py++){
         const idx=(py*W+px)*4;
         imgData.data[idx]=r; imgData.data[idx+1]=g;
@@ -436,17 +457,54 @@ window.addEventListener('load',()=>{
       }
     }
     ctx.putImageData(imgData,0,0);
+
+    // Vertical grid lines at T20, T40, T60, T80, T100
+    ctx.save();
+    [20,40,60,80,100].forEach(t=>{
+      const x=Math.round((t/120)*W);
+      ctx.strokeStyle='rgba(255,255,255,0.22)';
+      ctx.lineWidth=0.7;
+      ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke();
+    });
+
+    // Peak marker
+    let peakT=0, peakV=0;
+    for(let t=0;t<=120;t+=0.5){
+      const v=interpHz(hz,t);
+      if(v>peakV){peakV=v;peakT=t;}
+    }
+    const px2=Math.round((peakT/120)*W);
+    ctx.strokeStyle='rgba(255,255,255,0.45)';
+    ctx.lineWidth=1.2;
+    ctx.setLineDash([2,2]);
+    ctx.beginPath(); ctx.moveTo(px2,2); ctx.lineTo(px2,H-2); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Faint hazard values at 10-turn intervals
+    ctx.font=`${Math.max(6,H*0.28)}px sans-serif`;
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    [10,20,30,40,50,60,70,80,90,100,110].forEach(t=>{
+      const hv=interpHz(hz,t);
+      const val=Math.round(hv*1000)/10; // e.g. 0.090 → 9.0
+      const xp=(t/120)*W - (10/120)*W/2; // center of each 10t bin
+      // opacity scales with value — high values slightly more visible
+      const normV=Math.min(1,hv/rowMax);
+      const textAlpha=0.18+normV*0.14; // range 0.18~0.32, always subtle
+      ctx.fillStyle=`rgba(255,255,255,${textAlpha.toFixed(2)})`;
+      ctx.fillText(val.toFixed(1), (t/120)*W, H/2);
+    });
+
+    ctx.restore();
   });
 
-  // [B] Color scale bar — use Emergency color for scale gradient
+  // [B] Color scale bar
   const scaleBar=document.getElementById('hscaleBar');
   if(scaleBar){
-    const W=scaleBar.clientWidth||200, H=5;
-    const scaleCvs=document.createElement('canvas');
-    scaleCvs.width=W; scaleCvs.height=H;
-    scaleCvs.style.cssText='width:100%;height:100%;border-radius:3px';
-    const sctx=scaleCvs.getContext('2d');
-    const r=192,g=57,b=43; // CE breakdown
+    const W=scaleBar.clientWidth||200, H=6;
+    scaleBar.width=W; scaleBar.height=H;
+    const sctx=scaleBar.getContext('2d');
+    const r=192,g=57,b=43;
     const imgD=sctx.createImageData(W,H);
     for(let px=0;px<W;px++){
       const norm=px/W;
@@ -458,7 +516,6 @@ window.addEventListener('load',()=>{
       }
     }
     sctx.putImageData(imgD,0,0);
-    scaleBar.replaceWith(scaleCvs);
   }
 
   // [C] → now handled by Chart.js (efficiency frontier)
